@@ -23,14 +23,23 @@ const server = http.createServer(app);
 
 // Middleware
 app.use(express.json());
+// CORS middleware for Express
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: (origin, callback) => {
+      const allowedOrigins = [process.env.FRONTEND_URL, 'http://localhost:3000'];
+      if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+        callback(null, true); // Allow the origin
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true,
+    credentials: true,  // Enable cookies and authorization headers
   })
 );
+
 
 // MongoDB Connection
 mongoose.connect(process.env.MONGO_URL)
