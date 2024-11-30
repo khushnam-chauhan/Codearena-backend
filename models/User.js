@@ -69,8 +69,9 @@ userSchema.methods.calculateTier = function () {
   if (this.points >= 800) return 'Silver III';
   if (this.points >= 600) return 'Bronze I';
   if (this.points >= 300) return 'Bronze II';
-  return 'Bronze III';
+  return 'Bronze III'; // This is a valid enum value in the schema
 };
+
 
 // Middleware to update tier before saving
 userSchema.pre('save', function (next) {

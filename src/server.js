@@ -33,10 +33,13 @@ app.use(
 );
 
 // MongoDB Connection
-if (!process.env.MONGO_URL) {
-  console.error('MongoDB URI is not defined in environment variables.');
-  process.exit(1);
-}
+mongoose.connect(process.env.MONGO_URL)
+  .then(() => console.log('Connected to MongoDB'))
+  .catch((error) => {
+    console.error('Error connecting to MongoDB:', error.message);
+    process.exit(1);
+  });
+
 
 mongoose
   .connect(process.env.MONGO_URL, {

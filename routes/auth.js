@@ -4,53 +4,53 @@ const jwt = require('jsonwebtoken');
 
 // SIGN UP
 const signup = async (req, res) => {
-    const { username, email, password, country, institute, course } = req.body;
-    
-    // Validate required fields
-    if (!username || !email || !password || !country || !institute || !course) {
-      return res.status(400).json({ message: "All fields are required" });
+  const { username, email, password, country, institute, course } = req.body;
+  
+  // Validate required fields
+  if (!username || !email || !password || !country || !institute || !course) {
+    return res.status(400).json({ message: "All fields are required" });
+  }
+
+  try {
+    // Check if the user already exists by email
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: "Email already in use" });
     }
-  
-    try {
-      // Check if the user already exists by email
-      const existingUser = await User.findOne({ email });
-      if (existingUser) {
-        return res.status(400).json({ message: "Email already in use" });
-      }
-  
-      // Hash the user's password
-      const hashedPassword = await bcrypt.hash(password, 10);
-  
-      // Create a new user instance
-      const newUser = new User({
-        username,
-        email,
-        password: hashedPassword,
-        country,
-        institute,   // Include institute in the new user object
-        course,       // Include course in the new user object
-        points: 0,
-        problemsSolved: 0,
-        tier: 'Bronze',
-      });
-  
-      // Save the new user to the database
-      await newUser.save();
-  
-      // Create a JWT token for the user
-      const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-  
-      // Send success response with the token
-      res.status(201).json({
-        message: "User created successfully",
-        token, // Send token back to the frontend
-      });
-    } catch (err) {
-      console.error("Error during signup:", err); // Log the error
-      res.status(500).json({ message: "Server error", error: err.message }); // Send detailed error message
-    }
-  };
-  
+
+    // Hash the user's password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create a new user instance without manually setting tier
+    const newUser = new User({
+      username,
+      email,
+      password: hashedPassword,
+      country,
+      institute,
+      course,
+      points: 0,  // Default points value (tier will default to 'Bronze III')
+      problemsSolved: 0,
+      // Don't manually set the 'tier'
+    });
+
+    // Save the new user to the database
+    await newUser.save();
+
+    // Create a JWT token for the user
+    const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+    // Send success response with the token
+    res.status(201).json({
+      message: "User created successfully",
+      token, // Send token back to the frontend
+    });
+  } catch (err) {
+    console.error("Error during signup:", err); // Log the error
+    res.status(500).json({ message: "Server error", error: err.message }); // Send detailed error message
+  }
+};
+
 
 const login = async (req, res) => {
   const { email, password } = req.body;
